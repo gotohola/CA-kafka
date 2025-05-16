@@ -1,0 +1,10 @@
+services:
+  kafka:
+    build: ../kafka-broker-mtls
+    environment:
+      KAFKA_LISTENERS: SSL://0.0.0.0:9093
+      KAFKA_SSL_KEYSTORE_TYPE: PEM
+    volumes:
+      - ../certs:/certs
+    depends_on: [ vault ]
+    ports: [ "9093:9093" ]

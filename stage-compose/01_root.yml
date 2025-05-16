@@ -1,0 +1,5 @@
+services:
+  ca-root:
+    build: ../ca-root-generator
+    volumes:
+      - ../certs:/out

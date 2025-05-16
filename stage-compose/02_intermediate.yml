@@ -1,0 +1,30 @@
+services:
+  fix-perms:
+    image: alpine:3.20
+    command: sh -c "mkdir -p /vault/data && chown -R 100:100 /vault/data"
+    volumes:
+      - vault-data:/vault/data
+    restart: "no"
+
+  vault:
+    build: ../vault-intermediate-ca/stb
+    depends_on: [fix-perms]          # ← espera a que chmod termine
+    command: vault server -config=/etc/vault/vault-config.hcl
+    cap_add: ["IPC_LOCK"]
+    ports: ["8200:8200"]
+    volumes:
+      - ../certs:/certs
+      - vault-data:/vault/data
+
+  vault-bootstrap:
+    build: ../vault-intermediate-ca/efi
+    depends_on: [vault]
+    environment:
+      VAULT_ADDR: http://vault:8200
+    volumes:
+      - ../certs:/certs
+      - vault-data:/vault/data
+    restart: "no"
+
+volumes:
+  vault-data:

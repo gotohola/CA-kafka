@@ -1,0 +1,12 @@
+Comandos para liberar el vault server
+
+docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -it stage-compose-vault-1 \
+  vault operator init -key-shares=1 -key-threshold=1 > init.txt
+
+UNSEAL=$(grep 'Unseal Key 1:' init.txt | awk '{print $4}')
+ROOT=$(grep 'Initial Root Token:' init.txt | awk '{print $4}')
+
+docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -it stage-compose-vault-1 \
+  vault operator unseal $UNSEAL
+docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -it stage-compose-vault-1 \
+  vault login $ROOT

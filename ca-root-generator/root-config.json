@@ -1,0 +1,17 @@
+{
+  "CN": "SKCA Root CA",
+  "key": {
+    "algo": "rsa",
+    "size": 4096
+  },
+  "names": [
+    {
+      "C": "ES",
+      "L": "Murcia",
+      "O": "CyberDataLab"
+    }
+  ],
+  "ca": {
+    "expiry": "87600h"
+  }
+}

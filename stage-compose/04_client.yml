@@ -1,0 +1,6 @@
+services:
+  client:
+    build: ../kafka-client-mtls
+    volumes:
+      - ../certs:/certs
+    depends_on: [ kafka ]

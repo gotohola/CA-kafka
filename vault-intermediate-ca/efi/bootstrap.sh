@@ -68,4 +68,25 @@ vault write pki_int/roles/kafka-broker \
 vault write pki_int/roles/kafka-client \
       allowed_domains="client.kafka" allow_subdomains=true client_flag=true max_ttl=168h
 
+echo "[*] Creando policy y AppRole para brokers ..."
+echo 'path "pki_int/issue/kafka-broker" { capabilities = ["update"] }' \
+  | vault policy write kafka-broker -
+
+echo "[*] Habilitando método de autenticación AppRole ..."
+vault auth enable approle
+
+vault write auth/approle/role/kafka-broker-role \
+     policies="kafka-broker" \
+     secret_id_ttl=0 token_ttl=0 token_max_ttl=0
+
+ROLE_ID=$(vault read  -field=role_id \
+          auth/approle/role/kafka-broker-role/role-id)
+SECRET_ID=$(vault write -field=secret_id -f \
+            auth/approle/role/kafka-broker-role/secret-id)
+
+mkdir -p /approle
+echo "$ROLE_ID"   > /approle/role_id
+echo "$SECRET_ID" > /approle/secret_id
+
+
 echo "[+] Bootstrap completado. Vault listo para emitir certificados."

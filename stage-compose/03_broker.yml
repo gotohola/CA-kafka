@@ -3,17 +3,19 @@ services:
   kafka:
     build: ../kafka-broker-mtls
     depends_on:
-      - vault                       # servicio de Stage 2
+      - vault
     ports:
       - "9093:9093"
     volumes:
-      - ../certs:/certs             # rootCA.pem
-      - broker-auth:/vault          # role_id & secret_id
+      - ../certs:/certs
+      - broker-auth:/vault
+    networks:
+      - vault-net   # <—
 
 networks:
-  default:
+  vault-net:
     external: true
-    name: stage-compose_default     # comparte red con Vault
+    name: stage-compose_default  # <— red ya creada por Stage 2
 
 volumes:
   broker-auth:

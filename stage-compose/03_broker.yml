@@ -1,10 +1,19 @@
+
 services:
   kafka:
     build: ../kafka-broker-mtls
-    environment:
-      KAFKA_LISTENERS: SSL://0.0.0.0:9093
-      KAFKA_SSL_KEYSTORE_TYPE: PEM
+    depends_on:
+      - vault                       # servicio de Stage 2
+    ports:
+      - "9093:9093"
     volumes:
-      - ../certs:/certs
-    depends_on: [ vault ]
-    ports: [ "9093:9093" ]
+      - ../certs:/certs             # rootCA.pem
+      - broker-auth:/vault          # role_id & secret_id
+
+networks:
+  default:
+    external: true
+    name: stage-compose_default     # comparte red con Vault
+
+volumes:
+  broker-auth:

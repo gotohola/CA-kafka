@@ -24,7 +24,7 @@ services:
     volumes:
       - ../certs:/certs
       - vault-data:/vault/data
-      - broker-auth:/approle
+      - broker-auth:/vault
     restart: "no"
 
 volumes:

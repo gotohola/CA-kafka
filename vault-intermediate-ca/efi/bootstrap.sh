@@ -79,14 +79,15 @@ vault write auth/approle/role/kafka-broker-role \
      policies="kafka-broker" \
      secret_id_ttl=0 token_ttl=0 token_max_ttl=0
 
-ROLE_ID=$(vault read  -field=role_id \
-          auth/approle/role/kafka-broker-role/role-id)
-SECRET_ID=$(vault write -field=secret_id -f \
-            auth/approle/role/kafka-broker-role/secret-id)
+echo "[*] Emitiendo Secret-ID ..."
+SECRET_ID=$(vault write -force -field=secret_id \
+             auth/approle/role/kafka-broker-role/secret-id)
+ROLE_ID=$(vault read  -field=role_id  \
+             auth/approle/role/kafka-broker-role/role-id)
 
-mkdir -p /approle
-echo "$ROLE_ID"   > /approle/role_id
-echo "$SECRET_ID" > /approle/secret_id
-
+mkdir -p /vault                       # la MISMA ruta que usa el broker
+echo "$ROLE_ID"   > /vault/role_id
+echo "$SECRET_ID" > /vault/secret_id
+chmod 600 /vault/role_id /vault/secret_id
 
 echo "[+] Bootstrap completado. Vault listo para emitir certificados."

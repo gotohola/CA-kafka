@@ -1,0 +1,14 @@
+process.roles=broker,controller
+node.id=${NODE_ID}
+controller.listener.names=CONTROLLER
+listeners=CONTROLLER://0.0.0.0:9094,SSL://0.0.0.0:9093
+listener.security.protocol.map=CONTROLLER:PLAINTEXT,SSL:SSL
+inter.broker.listener.name=SSL
+controller.quorum.voters=${CONTROLLER_QUORUM_VOTERS}
+log.dirs=/var/lib/kafka/data
+
+ssl.keystore.type=PEM
+ssl.keystore.location=/etc/kafka/certs/broker.pem
+ssl.truststore.type=PEM
+ssl.truststore.location=/etc/kafka/certs/rootCA.pem
+ssl.endpoint.identification.algorithm=

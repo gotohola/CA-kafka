@@ -1,6 +1,6 @@
 services:
   kafka:
-    build: ../kafka-broker-mtls          # ruta al Dockerfile
+    build: .          # ruta al Dockerfile
     container_name: kafka-broker
     networks: [vault-net]
     environment:

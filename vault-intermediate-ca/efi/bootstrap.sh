@@ -90,4 +90,27 @@ echo "$ROLE_ID"   > /vault/role_id
 echo "$SECRET_ID" > /vault/secret_id
 chmod 600 /vault/role_id /vault/secret_id
 
+
+# --- CLIENT PKI ROLE, POLICY & APPROLE -------------------------------------
+echo "[*] Creando policy y AppRole para clientes ..."
+cat <<'EOF' | vault policy write kafka-client -
+path "pki_int/issue/kafka-client" {
+  capabilities = ["update"]
+}
+EOF
+
+vault write auth/approle/role/kafka-client-role \
+     policies="kafka-client" \
+     secret_id_ttl=0 token_ttl=0 token_max_ttl=0
+
+CLIENT_ROLE_ID=$(vault read -field=role_id  auth/approle/role/kafka-client-role/role-id)
+CLIENT_SECRET_ID=$(vault write -force -field=secret_id \
+                    auth/approle/role/kafka-client-role/secret-id)
+
+mkdir -p /vault/client
+echo "$CLIENT_ROLE_ID"   > /vault/client/role_id
+echo "$CLIENT_SECRET_ID" > /vault/client/secret_id
+chmod 600 /vault/client/*
+echo "[+] AppRole 'kafka-client-role' creado."
+
 echo "[+] Bootstrap completado. Vault listo para emitir certificados."

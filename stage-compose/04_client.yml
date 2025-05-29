@@ -1,6 +1,10 @@
 services:
-  client:
-    build: ../kafka-client-mtls
+  kafka-client:
+    build: ../kafka-client-mtls   # <- donde pongas el Dockerfile y el start.sh
+    depends_on: [vault]
+    environment:
+      VAULT_ADDR: http://vault:8200
     volumes:
-      - ../certs:/certs
-    depends_on: [ kafka ]
+      - broker-auth:/vault
+      - ./certs:/certs
+      - ./client:/client

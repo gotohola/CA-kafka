@@ -1,12 +1,9 @@
-Comandos para liberar el vault server
-
-docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -it stage-compose-vault-1 \
-  vault operator init -key-shares=1 -key-threshold=1 > init.txt
-
-UNSEAL=$(grep 'Unseal Key 1:' init.txt | awk '{print $4}')
-ROOT=$(grep 'Initial Root Token:' init.txt | awk '{print $4}')
-
-docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -it stage-compose-vault-1 \
-  vault operator unseal $UNSEAL
-docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -it stage-compose-vault-1 \
-  vault login $ROOT
+docker compose -f stage-compose/03_broker.yml down -v --remove-orphans
+docker volume rm stage-compose_broker-auth || true
+docker compose -f stage-compose/02_intermediate.yml down -v --remove-orphans
+docker compose -f stage-compose/02_intermediate.yml up -d
+docker compose -f stage-compose/02_intermediate.yml logs -f vault-bootstrap \
+  | grep -E "(Bootstrap completado|role_id|secret_id)"
+docker run --rm -v stage-compose_broker-auth:/data alpine ls -l /data
+docker compose -f stage-compose/03_broker.yml up -d --build
+docker compose -f stage-compose/03_broker.yml logs -f kafka

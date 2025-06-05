@@ -1,10 +1,24 @@
 services:
   kafka-client:
-    build: ../kafka-client-mtls   # <- donde pongas el Dockerfile y el start.sh
-    depends_on: [vault]
-    environment:
-      VAULT_ADDR: http://vault:8200
+    build:
+      context: ../kafka-client-mtls
+      dockerfile: Dockerfile
+    container_name: kafka-client
     volumes:
-      - broker-auth:/vault
-      - ./certs:/certs
-      - ./client:/client
+      - ../kafka-client-mtls/certs:/certs            # rootCA.pem
+      - ./certs:/output           # donde el agent escribe client.pem
+      - broker-auth:/vault        # role_id / secret_id
+    networks:
+      - vault-net
+    # abre shell, para que puedas probar manualmente:
+    command: ["bash"]
+
+networks:
+  vault-net:
+    external: true
+    name: stage-compose_default
+
+volumes:
+  broker-auth:
+    external: true
+    name: stage-compose_broker-auth

@@ -2,8 +2,12 @@ docker compose -f stage-compose/03_broker.yml down -v --remove-orphans
 docker volume rm stage-compose_broker-auth || true
 docker compose -f stage-compose/02_intermediate.yml down -v --remove-orphans
 docker compose -f stage-compose/02_intermediate.yml up -d
-docker compose -f stage-compose/02_intermediate.yml logs -f vault-bootstrap \
-  | grep -E "(Bootstrap completado|role_id|secret_id)"
 docker run --rm -v stage-compose_broker-auth:/data alpine ls -l /data
 docker compose -f stage-compose/03_broker.yml up -d --build
 docker compose -f stage-compose/03_broker.yml logs -f kafka
+docker compose -f stage-compose/04_client.yml up -d --build
+docker exec -it kafka-client bash
+
+
+echo | openssl s_client -connect kafka:9093 -CAfile /client/ca.crt -servername kafka \
+        -cert /client/client.crt -key /client/client.key -quiet

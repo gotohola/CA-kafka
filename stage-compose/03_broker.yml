@@ -1,20 +1,29 @@
 services:
   kafka:
-    build: ../kafka-broker-mtls          # ruta al Dockerfile
+    build: ../kafka-broker-mtls
     container_name: kafka-broker
-    networks: [vault-net]
+
+    networks:
+      vault-net:               # ⬅️  SAME network
+        aliases:               # ⬅️  NUEVO
+          - srv1.broker.kafka  #     ← el CN/SAN que aparece en el cert
+
     environment:
-      NODE_ID:        "0"
-      ADVERTISED_HOST: "kafka"     # nombre de servicio DNS interno
-      CONTROLLER_QUORUM_VOTERS: "0@kafka:9094"
+      NODE_ID: "0"
+      ADVERTISED_HOST: "srv1.broker.kafka"   # ← pon el mismo alias
+      CONTROLLER_QUORUM_VOTERS: "0@srv1.broker.kafka:9094"
+
     volumes:
-      - broker-auth:/vault         # role_id y secret_id
+      - broker-auth:/vault
       - kafka-data:/var/lib/kafka/data
+
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "/opt/kafka/bin/kafka-topics.sh",
-             "--bootstrap-server","kafka:9093",
-             "--command-config","/opt/kafka/config/manual/server.properties",
+
+    healthcheck:               # usa el alias para evitar el mismo error
+      test: ["CMD",
+             "/opt/kafka/bin/kafka-topics.sh",
+             "--bootstrap-server", "srv1.broker.kafka:9093",
+             "--command-config", "/opt/kafka/config/manual/server.properties",
              "--list"]
       interval: 30s
       timeout: 10s
@@ -23,7 +32,7 @@ services:
 networks:
   vault-net:
     external: true
-    name: stage-compose_default  # misma red que Vault
+    name: stage-compose_default
 
 volumes:
   broker-auth:
